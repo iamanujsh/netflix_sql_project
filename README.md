@@ -6,7 +6,7 @@ This project focuses on analyzing Netflix's dataset to uncover key insights usin
 
 ## Dataset Schema
 
-```sql
+```
 CREATE DATABASE Netflix;
 
 USE Netflix;
@@ -25,24 +25,32 @@ CREATE TABLE netflix (
     listed_in    VARCHAR(250),
     description  VARCHAR(550)
 );
-
--- Netflix Database Analysis
+```
+### Netflix Database Analysis
 
 -- 1. Create Database and Use it
-CREATE DATABASE Netflix;
 
+```sql
+CREATE DATABASE Netflix;
+```
 USE Netflix;
 
--- 2. Select All Data
-SELECT * FROM netflix;
+### 2. Select All Data
 
--- 1. Count of TV Shows vs. Movies
+```sql
+SELECT * FROM netflix;
+```
+### 1. Count of TV Shows vs. Movies
+
+```sql
 SELECT type,
        COUNT(type) AS [Total Count]
 FROM netflix
 GROUP BY type;
+```
+###2. Find the Most Common Rating for Movies and TV Shows
 
--- 2. Find the Most Common Rating for Movies and TV Shows
+```sql
 WITH countRating AS (
     SELECT type,
            rating,
@@ -60,14 +68,19 @@ rankRating AS (
 SELECT type, rating
 FROM rankRating
 WHERE [rank] = 1;
+```
+### 3. List All Movies Released in a Specific Year (e.g., 2020)
 
--- 3. List All Movies Released in a Specific Year (e.g., 2020)
+```sql
 SELECT * 
 FROM netflix
 WHERE type = 'Movie' 
   AND release_year = 2020;
+```
 
--- 4. Find the Top 5 Countries with the Most Content
+### 4. Find the Top 5 Countries with the Most Content
+
+```sql
 SELECT TOP 5
     TRIM(value) AS country,
     COUNT(*) AS [total_content]
@@ -75,8 +88,10 @@ FROM netflix
 CROSS APPLY STRING_SPLIT(country, ',')
 GROUP BY TRIM(value)
 ORDER BY [total_content] DESC;
+```
+### 5. Identify the Longest Movie
 
--- 5. Identify the Longest Movie
+```sql
 WITH GetValue AS (
     SELECT CAST(value AS INT) AS [Duration], 
            title
@@ -95,23 +110,31 @@ SELECT TOP 1 title, Duration
 FROM RankMovieBasedOnDuration 
 ORDER BY Duration DESC;
 
--- 6. Find Content Added in the Last 5 Years
+```
+### 6. Find Content Added in the Last 5 Years
+
+```sql
 SELECT * 
 FROM netflix
 WHERE TRY_CAST(date_added AS DATE) >= CAST(DATEADD(YEAR, -5, GETDATE()) AS DATE);
+```
+### 7. Find All Movies/TV Shows by Director 'Rajiv Chilaka'
 
--- 7. Find All Movies/TV Shows by Director 'Rajiv Chilaka'
 SELECT * 
 FROM netflix 
 WHERE director LIKE ('Rajiv Chilaka');
+```
+### 8. List All TV Shows with More Than 5 Seasons
 
--- 8. List All TV Shows with More Than 5 Seasons
+```sql
 SELECT * 
 FROM netflix
 WHERE type = 'TV Show' 
   AND duration > '5 Seasons';
+```
+### 9. Count the Number of Content Items in Each Genre
 
--- 9. Count the Number of Content Items in Each Genre
+```sql
 WITH FindGenre AS (
     SELECT *, 
            TRIM(value) AS [Genre] 
@@ -121,8 +144,10 @@ WITH FindGenre AS (
 SELECT Genre, COUNT(Genre) AS [total_content]
 FROM FindGenre
 GROUP BY Genre;
+```
+### 10. Find the Top 5 Years with the Highest Average Content Released by India
 
--- 10. Find the Top 5 Years with the Highest Average Content Released by India
+```sql
 WITH CountRelease AS (
     SELECT country, 
            release_year, 
@@ -136,8 +161,10 @@ SELECT TOP 5 release_year,
 FROM CountRelease 
 GROUP BY release_year
 ORDER BY [avg_release] DESC;
+```
+### 11. List All Movies That Are Documentaries
 
--- 11. List All Movies That Are Documentaries
+```sql
 WITH FilterGenre AS (
     SELECT *, 
            TRIM(value) AS [Genre]
@@ -148,20 +175,26 @@ SELECT title, Genre
 FROM FilterGenre 
 WHERE type = 'Movie' 
   AND Genre = 'Documentaries';
+```
+### 12. Find All Content Without a Director
 
--- 12. Find All Content Without a Director
+```sql
 SELECT * 
 FROM netflix 
 WHERE director IS NULL;
+```
+### 13. Find How Many Movies Actor Salman Khan Appeared in Last 10 Years
 
--- 13. Find How Many Movies Actor Salman Khan Appeared in Last 10 Years
+```sql
 SELECT * 
 FROM netflix
 WHERE type LIKE ('Movie') 
   AND release_year >= YEAR(CAST(DATEADD(YEAR, -10, GETDATE()) AS DATE))
   AND casts LIKE ('%Salman Khan%');
+```
+### 14. Find the Top 10 Actors Who Have Appeared in the Most Movies Produced in India
 
--- 14. Find the Top 10 Actors Who Have Appeared in the Most Movies Produced in India
+```sql
 WITH FilterCasts AS (
     SELECT *, 
            TRIM(value) AS [ExtractCasts]
@@ -175,8 +208,10 @@ SELECT TOP 10 ExtractCasts,
 FROM FilterCasts 
 GROUP BY ExtractCasts
 ORDER BY [total_movies] DESC;
+```
+### 15. Categorize Content Based on the Presence of 'Kill' and 'Violence' Keywords
 
--- 15. Categorize Content Based on the Presence of 'Kill' and 'Violence' Keywords
+```sql
 WITH LabelCategory AS (
     SELECT *,
            CASE 
@@ -189,4 +224,4 @@ SELECT label,
        COUNT(*) AS [count]
 FROM LabelCategory
 GROUP BY label;
-
+```
